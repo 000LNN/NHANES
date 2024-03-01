@@ -26,3 +26,51 @@ feihuoliang1<- feihuoliang %>% select(SEQN, # 序列号
 hdata<-join_all(list(dat1, xuetang1,tanghuadb1,feihuoliang1), by = 'SEQN', type = 'full')
 write.csv(hdata,file = "1.csv",row.names = F)
 
+##################################################2 logistic regression####################################################################################################
+mod2 <- glm(MCQ230A~ DMDBORN+INDFMPIR+BMXHT+BMXWAIST+RHQ310+RHQ540,data=NHANES_1999_2006_NA_1,family = binomial(link = 'logit'))
+summary(mod2)
+exp(cbind(OR = coef(mod2), confint(mod2)))
+Loggstic1 <- tbl_regression(mod2, exponentiate=T)
+Loggstic1
+
+##################################################3 Multiple Imputation##################################################################################
+library(mice) # 载入mice包
+data(sleep,package = "VIM") # 载入VIM包中的sleep数据集
+imp <- mice(sleep, seed = 1234) # 创建包含默认5个插补数据集的列表
+summary(imp)
+imp$imp$Span
+complete(imp, action = #) # 括号内的#指的是m个完整数据集中哪一个
+
+dataset2 <- complete(imp, action = 2)
+dataset2 # 查看dataset2数据集
+
+fit=with(imp,lm(Time ~ 	AGE+Sex+Surgery+Grade))
+summary(fit)
+summary(fit[["analyses"]][[1]])
+summary(fit[["analyses"]][[2]])
+summary(fit[["analyses"]][[3]])
+summary(fit[["analyses"]][[4]])
+summary(fit[["analyses"]][[5]])
+AIC(fit[["analyses"]][[1]])
+AIC(fit[["analyses"]][[2]])
+AIC(fit[["analyses"]][[3]])
+AIC(fit[["analyses"]][[4]])
+AIC(fit[["analyses"]][[5]])
+BIC(fit[["analyses"]][[1]])
+BIC(fit[["analyses"]][[2]])
+BIC(fit[["analyses"]][[3]])
+BIC(fit[["analyses"]][[4]])
+BIC(fit[["analyses"]][[5]])
+anova(fit[["analyses"]][[1]],fit[["analyses"]][[2]])
+
+
+
+
+
+
+
+
+
+
+
+
