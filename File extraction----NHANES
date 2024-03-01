@@ -1,0 +1,27 @@
+#package
+library(haven)
+library(nhanesA)
+library(tidyverse)
+mydata <- read_xpt("e:/nhanes/DEMO_E.XPT")
+
+#document
+xuetang <- nhanes('GLU_E')
+tanghuadb <- nhanes('GHB_E')
+feihuoliang <- nhanes('SPXRAW_E ')
+
+#select
+xuetang1 <- xuetang  %>% select(SEQN, # 序列号
+                                LBDGLUSI, #血糖mmol表示
+                                LBDINSI, #胰岛素( pmmol/L)
+                                PHAFSTHR #餐后血糖)
+
+tanghuadb1<- tanghuadb %>% select(SEQN, # 序列号
+                                  LBXGH #糖化血红蛋白)
+feihuoliang1<- feihuoliang %>% select(SEQN, # 序列号
+                                      SPXNFEV1, #FEV1：第一秒用力呼气量
+                                      SPXNFVC  #FVC：用力肺活量，ml（估计肺容量）)
+
+#merge
+hdata<-join_all(list(dat1, xuetang1,tanghuadb1,feihuoliang1), by = 'SEQN', type = 'full')
+write.csv(hdata,file = "1.csv",row.names = F)
+
