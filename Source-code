@@ -16,11 +16,11 @@ xuetang1 <- xuetang  %>% select(SEQN, #serial number
                                 LBDINSI, #insulin( pmmol/L)
                                 PHAFSTHR #postprandial blood sugar)
 
-tanghuadb1<- tanghuadb %>% select(SEQN, # 序列号
-                                  LBXGH #糖化血红蛋白)
-feihuoliang1<- feihuoliang %>% select(SEQN, # 序列号
-                                      SPXNFEV1, #FEV1：第一秒用力呼气量
-                                      SPXNFVC  #FVC：用力肺活量，ml（估计肺容量）)
+tanghuadb1<- tanghuadb %>% select(SEQN, # serial number
+                                  LBXGH #glycosylated hemoglobin)
+feihuoliang1<- feihuoliang %>% select(SEQN, # serial number
+                                      SPXNFEV1, #FEV1
+                                      SPXNFVC  #FVC，ml)
 
 #merge
 hdata<-join_all(list(dat1, xuetang1,tanghuadb1,feihuoliang1), by = 'SEQN', type = 'full')
@@ -34,15 +34,14 @@ Loggstic1 <- tbl_regression(mod2, exponentiate=T)
 Loggstic1
 
 ##################################################3 Multiple Imputation##################################################################################
-library(mice) # 载入mice包
-data(sleep,package = "VIM") # 载入VIM包中的sleep数据集
-imp <- mice(sleep, seed = 1234) # 创建包含默认5个插补数据集的列表
+library(mice) 
+data(sleep,package = "VIM") 
+imp <- mice(sleep, seed = 1234) 
 summary(imp)
 imp$imp$Span
-complete(imp, action = #) # 括号内的#指的是m个完整数据集中哪一个
 
 dataset2 <- complete(imp, action = 2)
-dataset2 # 查看dataset2数据集
+dataset2 #  View the dataset 2
 
 fit=with(imp,lm(Time ~ 	AGE+Sex+Surgery+Grade))
 summary(fit)
@@ -71,38 +70,31 @@ index <-  which( (1:nrow(data))%%3 == 0 )
 train <- data[-index,]
 test <- data[index,]
 summary(train)
-#检查Y的分布
-prop.table(table(train$X16_31))
 
-#检测数据精度
+prop.table(table(train$X16_31))#Check the distribution of Y
+
+
 library("rpart")
 treeimb <- rpart(X16_31_2~ ., data=train)
 pred.treeimb <- predict(treeimb, newdata= test)
 roc.curve(test$X16_31_2,pred.treeimb[,2], plotit = F)
 
-#
-#1 人工数据合成
-data.rose <- ROSE(X16_31_2 ~ ., data =train, seed = 1)$data
-summary(data.rose)
-tree.rose <- rpart(X16_31_2 ~ ., data =data.rose)
-pred.tree.rose <- predict(tree.rose,newdata = test)
-roc.curve(test$X16_31_2,pred.tree.rose[,2], plotit = F)
 
-#2 过采样 over
+#1 过采样 over-sampling
 data.balanced.over <- ovun.sample(X16_31_2 ~., data = train, method = "over",N = 12972,seed = 1)$data
 summary(data.balanced.over)
 tree.over <- rpart(X16_31_2 ~ ., data =data.balanced.over)
 pred.tree.over <- predict(tree.over,newdata = test)
 roc.curve(test$X16_31_2,pred.tree.over[,2], plotit = F)
 
-#3 欠采样 under
+#2 欠采样 under-sampling
 data.balanced.under <- ovun.sample(X16_31_2 ~., data = train, method = "under", N = 16, seed = 1)$data
 summary(data.balanced.under)
 tree.under <- rpart(X16_31_2 ~ ., data =data.balanced.under)
 pred.tree.under <- predict(tree.under,newdata = test)
 roc.curve(test$X16_31_2,pred.tree.under[,2], plotit = F)
 
-#4 both
+#3 both
 data.balanced.both <- ovun.sample(X16_31_2 ~., data = train, method = "both", p=0.5, N=1000, seed =1)$data
 summary(data.balanced.both)
 tree.both <- rpart(X16_31_2 ~ ., data =data.balanced.both)
