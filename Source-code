@@ -10,11 +10,11 @@ xuetang <- nhanes('GLU_E')
 tanghuadb <- nhanes('GHB_E')
 feihuoliang <- nhanes('SPXRAW_E ')
 
-#select
-xuetang1 <- xuetang  %>% select(SEQN, # 序列号
-                                LBDGLUSI, #血糖mmol表示
-                                LBDINSI, #胰岛素( pmmol/L)
-                                PHAFSTHR #餐后血糖)
+#selec(an example)
+xuetang1 <- xuetang  %>% select(SEQN, #serial number
+                                LBDGLUSI, #blood glucose mmol表示
+                                LBDINSI, #insulin( pmmol/L)
+                                PHAFSTHR #postprandial blood sugar)
 
 tanghuadb1<- tanghuadb %>% select(SEQN, # 序列号
                                   LBXGH #糖化血红蛋白)
