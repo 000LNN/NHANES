@@ -12,7 +12,7 @@ feihuoliang <- nhanes('SPXRAW_E ')
 
 #selec(an example)
 xuetang1 <- xuetang  %>% select(SEQN, #serial number
-                                LBDGLUSI, #blood glucose mmol表示
+                                LBDGLUSI, #blood glucose（mmol）
                                 LBDINSI, #insulin( pmmol/L)
                                 PHAFSTHR #postprandial blood sugar)
 
@@ -80,14 +80,14 @@ pred.treeimb <- predict(treeimb, newdata= test)
 roc.curve(test$X16_31_2,pred.treeimb[,2], plotit = F)
 
 
-#1 过采样 over-sampling
+#1 over-sampling
 data.balanced.over <- ovun.sample(X16_31_2 ~., data = train, method = "over",N = 12972,seed = 1)$data
 summary(data.balanced.over)
 tree.over <- rpart(X16_31_2 ~ ., data =data.balanced.over)
 pred.tree.over <- predict(tree.over,newdata = test)
 roc.curve(test$X16_31_2,pred.tree.over[,2], plotit = F)
 
-#2 欠采样 under-sampling
+#2 under-sampling
 data.balanced.under <- ovun.sample(X16_31_2 ~., data = train, method = "under", N = 16, seed = 1)$data
 summary(data.balanced.under)
 tree.under <- rpart(X16_31_2 ~ ., data =data.balanced.under)
