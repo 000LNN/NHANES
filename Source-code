@@ -63,6 +63,61 @@ BIC(fit[["analyses"]][[4]])
 BIC(fit[["analyses"]][[5]])
 anova(fit[["analyses"]][[1]],fit[["analyses"]][[2]])
 
+################################################4 Imbalanced Datasets###########################################################################################
+data <- read.csv("C:/Users/Desktop/Gynecological_operation_1999_2020_3_3.CSV")
+data$X16_31_2<- as.factor(data$X16_31_2)
+set.seed(1234)  
+index <-  which( (1:nrow(data))%%3 == 0 )
+train <- data[-index,]
+test <- data[index,]
+summary(train)
+#检查Y的分布
+prop.table(table(train$X16_31))
+
+#检测数据精度
+library("rpart")
+treeimb <- rpart(X16_31_2~ ., data=train)
+pred.treeimb <- predict(treeimb, newdata= test)
+roc.curve(test$X16_31_2,pred.treeimb[,2], plotit = F)
+
+#
+#1 人工数据合成
+data.rose <- ROSE(X16_31_2 ~ ., data =train, seed = 1)$data
+summary(data.rose)
+tree.rose <- rpart(X16_31_2 ~ ., data =data.rose)
+pred.tree.rose <- predict(tree.rose,newdata = test)
+roc.curve(test$X16_31_2,pred.tree.rose[,2], plotit = F)
+
+#2 过采样 over
+data.balanced.over <- ovun.sample(X16_31_2 ~., data = train, method = "over",N = 12972,seed = 1)$data
+summary(data.balanced.over)
+tree.over <- rpart(X16_31_2 ~ ., data =data.balanced.over)
+pred.tree.over <- predict(tree.over,newdata = test)
+roc.curve(test$X16_31_2,pred.tree.over[,2], plotit = F)
+
+#3 欠采样 under
+data.balanced.under <- ovun.sample(X16_31_2 ~., data = train, method = "under", N = 16, seed = 1)$data
+summary(data.balanced.under)
+tree.under <- rpart(X16_31_2 ~ ., data =data.balanced.under)
+pred.tree.under <- predict(tree.under,newdata = test)
+roc.curve(test$X16_31_2,pred.tree.under[,2], plotit = F)
+
+#4 both
+data.balanced.both <- ovun.sample(X16_31_2 ~., data = train, method = "both", p=0.5, N=1000, seed =1)$data
+summary(data.balanced.both)
+tree.both <- rpart(X16_31_2 ~ ., data =data.balanced.both)
+pred.tree.both <- predict(tree.both,newdata = test)
+roc.curve(test$X16_31_2,pred.tree.both[,2], plotit = F)
+#################################################5 PAF######################################################################################
+library(readxl)
+data<- read_excel("C:/Users/?ֶ?/Desktop/EXCEL/??Ѫѹ????.xlsx")
+attach(data)
+a<-RR_per_10mmhg^0.1
+F1<-function(a,miu1,sigma1,miu2,lowerlimit,higherlimit){return(pnorm((miu2-miu1)/sigma1)-pnorm((lowerlimit-miu1)/sigma1)+a^(miu1-miu2)*exp((sigma1*log(a))^2*0.5)*(pnorm((higherlimit-miu1)/sigma1-sigma1*log(a))-pnorm((miu2-miu1)/sigma1-sigma1*log(a))))}
+F2<-function(a,miu2,sigma2,lowerlimit,higherlimit){return(pnorm(0)-pnorm((lowerlimit-miu2)/sigma2)+exp((sigma2*log(a))^2*0.5)*(pnorm((higherlimit-miu2)/sigma2-sigma2*log(a))-pnorm(-sigma2*log(a))))}
+PAF<-round((F1(a,miu1,sigma1,miu2,lowerlimit,higherlimit)-F2(a,miu2,sigma2,lowerlimit,higherlimit))/F1(a,miu1,sigma1,miu2,lowerlimit,higherlimit),4)
+dataPAF<-cbind(data,PAF)
+View(dataPAF)
 
 
 
